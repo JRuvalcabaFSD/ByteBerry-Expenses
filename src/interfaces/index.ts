@@ -1,3 +1,6 @@
+//Auth
+export * from './auth/jwt.interface.js';
+
 //Config
 export * from './config/env.config.interface.js';
 

@@ -11,6 +11,18 @@
 
 export type ErrorType = 'bootstrap' | 'config' | 'container' | 'http' | 'domain' | 'oauth';
 
+/**
+ * Represents an application error with typed error information and optional context.
+ * Extends the native Error class and captures stack traces for better debugging.
+ *
+ * @extends Error
+ *
+ * @example
+ * throw new AppError('User not found', ErrorType.NOT_FOUND, { userId: 123 });
+ *
+ * @class AppError
+ */
+
 export class AppError extends Error {
 	public readonly errorType: ErrorType;
 	public readonly context?: Record<string, unknown>;
@@ -21,5 +33,24 @@ export class AppError extends Error {
 		this.context = context;
 
 		Error.captureStackTrace(this, AppError);
+	}
+}
+
+/**
+ * Error thrown when a value object fails validation or initialization.
+ *
+ * @extends {AppError}
+ * @example
+ * ```ts
+ * throw new ValueObjectError('Invalid email format');
+ * ```
+ */
+
+export class ValueObjectError extends AppError {
+	constructor(msg: string) {
+		super(msg, 'domain');
+		this.name = 'ValueObjectError';
+
+		Error.captureStackTrace(this, ValueObjectError);
 	}
 }

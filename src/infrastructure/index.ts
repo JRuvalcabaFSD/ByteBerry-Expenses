@@ -1,16 +1,5 @@
-// ======================================
-// import modules for implements decorators
-// ======================================
-import './services/clock.service.js';
-import './services/health.service.js';
-import './services/uuid.service.js';
-import './services/winston-logger.service.js';
-import './http/http.server.js';
-import './lifecycle/shutdown.js';
-
-// ======================================
-// Export modules
-// ======================================
+// Clients
+export * from './clients/jwks.client.js';
 
 //Http
 export * from './http/http.server.js';
@@ -32,3 +21,4 @@ export * from './services/health-register.service.js';
 export * from './services/health.service.js';
 export * from './services/uuid.service.js';
 export * from './services/winston-logger.service.js';
+export * from './services/jwt-verifier.service.js';

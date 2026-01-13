@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
 
 import { Injectable } from '@shared';
-import type { HomeResponse, IClock, IConfig, IHealthService } from '@interfaces';
+import type { HomeResponse, IClock, IConfig, IHealthService, IJwtVerifier } from '@interfaces';
 import { createHealthRoutes } from './health.routes.js';
+import { createAuthMiddleware, ExpensesController } from '@presentation';
+import { createExpensesRoutes } from './expenses.routes.js';
 
 /**
  * Extends the global ServiceMap interface to include the IConfig interface.
@@ -18,14 +20,16 @@ declare module '@ServiceMap' {
 }
 
 //TODO documentar
-@Injectable({ name: 'AppRouter', depends: ['Config', 'Clock', 'HealthService'] })
+@Injectable({ name: 'AppRouter', depends: ['Config', 'Clock', 'HealthService', 'JwtVerifier', 'ExpensesController'] })
 export class AppRouter {
 	private readonly router: Router;
 
 	constructor(
 		private readonly config: IConfig,
 		private readonly clock: IClock,
-		private readonly heathService: IHealthService
+		private readonly heathService: IHealthService,
+		private readonly jwtVerifier: IJwtVerifier,
+		private readonly expensesCtl: ExpensesController
 	) {
 		this.router = Router();
 		this.setupRoutes();
@@ -52,8 +56,12 @@ export class AppRouter {
 
 	private setupRoutes(): void {
 		const baseurl = `${this.config.serviceUrl}:${this.config.port}`;
+		const requireAuth = createAuthMiddleware(this.jwtVerifier);
 
-		//Health
+		// Expenses
+		this.router.use('/expenses', requireAuth, createExpensesRoutes(this.expensesCtl));
+
+		// Health
 		this.router.use('/health', createHealthRoutes(this.heathService));
 
 		this.router.get('/', (req: Request, res: Response) => {
