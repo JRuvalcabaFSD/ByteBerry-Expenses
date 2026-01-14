@@ -1,0 +1,28 @@
+services:
+  # Base de datos para el servicio Expenses
+  expenses-db:
+    image: postgres:15-alpine
+    networks:
+      - byteberry-network
+    container_name: expenses-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: expenses_user
+      POSTGRES_PASSWORD: expenses_pass
+      POSTGRES_DB: byteberry_expenses_dev
+    volumes:
+      - expenses_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U expenses_user -d byteberry_expenses_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  expenses_db_data:
+
+networks:
+  byteberry-network:
+    name: byteberry-network
+    driver: bridge
