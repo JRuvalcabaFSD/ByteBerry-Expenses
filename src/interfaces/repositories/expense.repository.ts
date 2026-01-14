@@ -8,6 +8,22 @@ declare module '@ServiceMap' {
 }
 
 /**
+ * Represents the updateable properties of an expense entity.
+ * @typedef {Object} UpdateExpense
+ * @property {number} [amount] - The expense amount. Optional.
+ * @property {string} [description] - The expense description. Optional.
+ * @property {string | null} [category] - The expense category, or null to clear it. Optional.
+ * @property {Date} [expenseDate] - The date of the expense. Optional.
+ */
+
+export interface UpdateExpense {
+	amount?: number;
+	description?: string;
+	category?: string | null;
+	expenseDate?: Date;
+}
+
+/**
  * Repository interface for managing expense data operations.
  * Provides methods for creating, retrieving, updating, and deleting expenses,
  * with support for user-specific queries and pagination.
@@ -55,7 +71,7 @@ export interface IExpensesRepository {
 	 * @returns A promise that resolves to the updated expense entity
 	 */
 
-	update(id: string, updates: Partial<ExpenseEntity>): Promise<ExpenseEntity>;
+	update(id: string, userId: string, updates: UpdateExpense): Promise<ExpenseEntity>;
 
 	/**
 	 * Deletes an expense by its unique identifier.
@@ -63,7 +79,7 @@ export interface IExpensesRepository {
 	 * @returns A promise that resolves when the expense is deleted
 	 */
 
-	delete(id: string): Promise<void>;
+	delete(id: string, userId: string): Promise<void>;
 
 	/**
 	 * Counts the total number of expenses for a specific user.

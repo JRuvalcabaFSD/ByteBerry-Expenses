@@ -1,6 +1,14 @@
 import { ExpenseEntity } from '@domain';
-import type { IExpensesRepository, ILogger } from '@interfaces';
-import { getErrMessage, handledPrismaError, Injectable, LogContextClass, LogContextMethod } from '@shared';
+import type { IExpensesRepository, ILogger, UpdateExpense } from '@interfaces';
+import {
+	ForbiddenError,
+	getErrMessage,
+	handledPrismaError,
+	Injectable,
+	LogContextClass,
+	LogContextMethod,
+	NotFoundRecordError,
+} from '@shared';
 import { DBConfig } from '@config';
 import { PrismaClient } from '@prisma/client';
 
@@ -83,12 +91,11 @@ export class ExpensesRepository implements IExpensesRepository {
 	 */
 
 	@LogContextMethod()
-	public async findByUserId(userId: string): Promise<ExpenseEntity[] | null> {
+	public async findByUserId(userId: string): Promise<ExpenseEntity[]> {
 		this.logger.debug('Finding expenses by user ID', { userId });
 
 		try {
 			const expenses = await this.client.expenses.findMany({ where: { userId }, orderBy: { expenseDate: 'desc' } });
-			if (!expenses) return null;
 
 			this.logger.debug('Expenses found', { userId, count: expenses.length });
 			return expenses.map((expense) => ExpenseEntity.create({ ...expense }));
@@ -132,9 +139,34 @@ export class ExpensesRepository implements IExpensesRepository {
 	 */
 
 	@LogContextMethod()
-	public async update(id: string, _updates: Partial<ExpenseEntity>): Promise<ExpenseEntity> {
-		this.logger.debug('Update method called but not implemented in F2', { expenseId: id });
-		throw new Error('Method not implemented.');
+	public async update(id: string, userId: string, updates: UpdateExpense): Promise<ExpenseEntity> {
+		this.logger.debug('Updating expense with ownership verification', { expenseId: id, userId });
+
+		try {
+			const existing = await this.client.expenses.findUnique({ where: { id } });
+
+			if (!existing) {
+				this.logger.warn('Expense not found for update', { expenseId: id });
+				throw new NotFoundRecordError(`Expense with id ${id} not found`);
+			}
+
+			if (existing.userId !== userId) {
+				this.logger.warn('Ownership verification failed for update', {
+					expenseId: id,
+					requestingUserId: userId,
+					ownerUserId: existing.userId,
+				});
+				throw new ForbiddenError(`User ${userId} does not have permission to update expense ${id}`);
+			}
+
+			const data = { ...updates, category: updates.category ?? existing.category };
+			const updated = await this.client.expenses.update({ where: { id }, data });
+			this.logger.debug('Expense updated successfully', { expenseId: id });
+			return ExpenseEntity.create({ ...updated });
+		} catch (error) {
+			this.logger.error('Failed to update expense', { expenseId: id, error: getErrMessage(error) });
+			throw handledPrismaError(error);
+		}
 	}
 
 	/**
@@ -145,9 +177,32 @@ export class ExpensesRepository implements IExpensesRepository {
 	 */
 
 	@LogContextMethod()
-	public async delete(id: string): Promise<void> {
-		this.logger.debug('Delete method called but not implemented in F2', { expenseId: id });
-		throw new Error('Method not implemented.');
+	public async delete(id: string, userId: string): Promise<void> {
+		this.logger.debug('Deleting expense with ownership verification', { expenseId: id, userId });
+
+		try {
+			const existing = await this.client.expenses.findUnique({ where: { id } });
+			if (!existing) {
+				this.logger.warn('Expense not found for deletion', { expenseId: id });
+				throw new NotFoundRecordError(`Expense with id ${id} not found`);
+			}
+
+			if (existing.userId !== userId) {
+				this.logger.warn('Ownership verification failed for deletion', {
+					expenseId: id,
+					requestingUserId: userId,
+					ownerUserId: existing.userId,
+				});
+				throw new ForbiddenError(`User ${userId} does not have permission to delete expense ${id}`);
+			}
+
+			await this.client.expenses.delete({ where: { id } });
+
+			this.logger.debug('Expense deleted successfully', { expenseId: id, userId });
+		} catch (error) {
+			this.logger.error('Failed to delete expense', { expenseId: id, userId, error: getErrMessage(error) });
+			throw handledPrismaError(error);
+		}
 	}
 
 	/**
