@@ -50,12 +50,12 @@ export class JwtVerifier implements IJwtVerifier {
 	public async verify(token: string): Promise<IJwtPayload> {
 		try {
 			const decoded = jwt.decode(token, { complete: true });
-			if (!decoded || typeof decoded === 'string') throw new InvalidCredentialsError('Invalid token format: missing key ID');
+			if (!decoded || typeof decoded === 'string' || !decoded.header.kid)
+				throw new InvalidCredentialsError('Invalid token format: missing key ID');
 
-			const kid = 'byteberry-key-1';
+			const kid = decoded.header.kid;
 
-			const signingKey = await this.jwksClient.getSigningKey(kid);
-			const publicKey = signingKey.getPublicKey();
+			const publicKey = (await this.jwksClient.getSigningKey(kid)) as unknown as string;
 
 			const options: VerifyOptions = {
 				algorithms: ['RS256'],

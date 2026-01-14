@@ -46,8 +46,8 @@ export class Config implements IConfig {
 			// ========================================
 			// OAuth2 environments
 			// ========================================
-			this.jwtIssuer = env.get('JWT_ISSUER').default('https://byteberry.jrmdev.org').asUrlString();
-			this.jwtAudience = env.get('JWT_AUDIENCE').default('https://byteberry.jrmdev.org').asString();
+			this.jwtIssuer = this.normalizeUrls(env.get('JWT_ISSUER').default('https://byteberry.jrmdev.org').asUrlString());
+			this.jwtAudience = env.get('JWT_AUDIENCE').default('byteberry-api').asString();
 			this.jwksCacheTtl = env.get('JWKS_CACHE_TTL').default('3600').asIntPositive();
 			this.jwksCacheMaxAge = env.get('JWKS_CACHE_MAX_AGE').default('86400').asIntPositive();
 			this.oauth2ServiceUrl = this.normalizeUrls(env.get('OAUTH2_SERVICE_URL').default('http://localhost:4000').asUrlString());
