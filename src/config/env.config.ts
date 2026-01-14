@@ -24,6 +24,11 @@ export class Config implements IConfig {
 	public readonly oauth2ServiceUrl: string;
 	public readonly oauth2JwksUrl: string;
 
+	// Database
+	public readonly databaseUrl: string;
+	public readonly databasePoolMin: number;
+	public readonly databasePoolMax: number;
+
 	//Security environments
 	readonly corsOrigins: string[];
 
@@ -54,6 +59,13 @@ export class Config implements IConfig {
 			this.oauth2JwksUrl = this.normalizeUrls(
 				env.get('OAUTH2_JWKS_URL').default('https://localhost:4000/auth/.well-known/jwks.json').asUrlString()
 			);
+
+			// ========================================
+			// Database environments
+			// ========================================
+			this.databaseUrl = this.normalizeUrls(env.get('DATABASE_URL').required().asUrlString());
+			this.databasePoolMax = env.get('DATABASE_POOL_MAX').default('10').asIntPositive();
+			this.databasePoolMin = env.get('DATABASE_POOL_MIN').default('2').asIntPositive();
 
 			// ========================================
 			// Security environments
