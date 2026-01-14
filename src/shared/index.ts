@@ -8,6 +8,7 @@ export * from './errors/core.errors.js';
 export * from './errors/handler.errors.js';
 export * from './errors/http.errors.js';
 export * from './errors/auth.errors.js';
+export * from './errors/database.errors.js';
 
 // Helpers
 export * from './helpers/functions.js';

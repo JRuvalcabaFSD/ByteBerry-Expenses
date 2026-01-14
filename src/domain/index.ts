@@ -1,3 +1,6 @@
+// Entities
+export * from './entities/expense.entity.js';
+
 //Value objects
 export * from './value-objects/token.vo.js';
 

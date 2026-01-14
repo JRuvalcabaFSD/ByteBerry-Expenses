@@ -15,6 +15,9 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdown-config.js';
 
+//Repositories
+export * from './repositories/prisma-expense.repository.js';
+
 //Services
 export * from './services/clock.service.js';
 export * from './services/health-register.service.js';

@@ -53,6 +53,11 @@ export interface IConfig extends HealthCheckable {
 	readonly oauth2ServiceUrl: string;
 	readonly oauth2JwksUrl: string;
 
+	// Database
+	readonly databaseUrl: string;
+	readonly databasePoolMin: number;
+	readonly databasePoolMax: number;
+
 	//Security
 	readonly corsOrigins: string[];
 
