@@ -19,3 +19,6 @@ export * from './services/clock.service.interface.js';
 export * from './services/logger.service.interface.js';
 export * from './services/health.service.interface.js';
 export * from './services/uuid.service.interface.js';
+
+// Use Cases
+export * from './use-cases/expense.use-case.interface.js';

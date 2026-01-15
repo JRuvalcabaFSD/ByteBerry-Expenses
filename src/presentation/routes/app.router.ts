@@ -59,7 +59,7 @@ export class AppRouter {
 		const requireAuth = createAuthMiddleware(this.jwtVerifier);
 
 		// Expenses
-		this.router.use('/expenses', requireAuth, createExpensesRoutes(this.expensesCtl));
+		this.router.use('/expense', requireAuth, createExpensesRoutes(this.expensesCtl));
 
 		// Health
 		this.router.use('/health', createHealthRoutes(this.heathService));
@@ -102,16 +102,7 @@ export class AppRouter {
 			{ name: 'home', value: `${baseUrl}/`, method: 'GET' },
 			{ name: 'deepHealth', value: `${baseUrl}/health/deep`, method: 'GET' },
 			{ name: 'health', value: `${baseUrl}/health`, method: 'GET' },
-			// { name: 'authorize', value: `${baseUrl}/auth/authorize`, method: 'GET' },
-			// { name: 'JWKS', value: `${baseUrl}/auth/.well-known/jwks.json`, method: 'GET' },
-			// { name: 'login', value: `${baseUrl}/auth/login`, method: 'POST' },
-			// { name: 'login', value: `${baseUrl}/auth/login`, method: 'GET' },
-			// { name: 'token', value: `${baseUrl}/auth/token`, method: 'POST' },
-			// { name: 'user', value: `${baseUrl}/user/register`, method: 'POST' },
-			// { name: 'currentUser', value: `${baseUrl}/user/me`, method: 'GET' },
-			// { name: 'update', value: `${baseUrl}/user/me`, method: 'PUT' },
-			// { name: 'updatePassword', value: `${baseUrl}/user/me/password`, method: 'PUT' },
-			// { name: 'createClient', value: `${baseUrl}/client`, method: 'POST' },
+			{ name: 'createExpense', value: `${baseUrl}/expense`, method: 'POST' },
 		];
 
 		return routes.reduce(
