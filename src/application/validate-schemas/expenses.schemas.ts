@@ -1,6 +1,6 @@
 import { object, string, ZodType } from 'zod';
 
-import { requiredNumber, requiredString, stringISODate } from './helpers.js';
+import { requiredNumber, requiredString, stringISODate, stringToNumber } from './helpers.js';
 
 /**
  * Represents the data required to create a new expense.
@@ -18,6 +18,20 @@ export interface CreateExpenseData {
 	description: string;
 	category?: string | null;
 	expenseDate: Date;
+}
+
+/**
+ * Data structure for listing expenses with pagination support.
+ * @interface ListExpensesData
+ * @property {string | undefined} userId - The unique identifier of the user whose expenses are being retrieved.
+ * @property {number | undefined} [skip] - The number of records to skip for pagination. Defaults to 0 if not specified.
+ * @property {number | undefined} [take] - The maximum number of records to return for pagination. Defaults to all records if not specified.
+ */
+
+export interface ListExpensesData {
+	userId: string | undefined;
+	skip?: number | undefined;
+	take?: number | undefined;
 }
 
 /**
@@ -41,4 +55,25 @@ export const CreateExpenseSchema: ZodType<CreateExpenseData> = object({
 	description: requiredString('Description').max(500, 'Description exceeds maximum length (500 characters)'),
 	category: string().max(100, 'Category exceeds maximum length (100 characters)').optional(),
 	expenseDate: stringISODate('Expense Date'),
+});
+
+/**
+ * Zod schema for validating list expenses request parameters.
+ * @typedef {Object} ListExpensesSchema
+ * @property {string} userId - The user ID. Must be a non-empty string.
+ * @property {number} skip - The number of records to skip. Converted from string to number.
+ * @property {number} take - The number of records to take. Converted from string to number.
+ * @example
+ * const data = {
+ *   userId: "user123",
+ *   skip: "0",
+ *   take: "10"
+ * };
+ * const validated = ListExpensesSchema.parse(data);
+ */
+
+export const ListExpensesSchema: ZodType<ListExpensesData> = object({
+	userId: requiredString('User ID'),
+	skip: stringToNumber('Skip').optional(),
+	take: stringToNumber('Take').optional(),
 });

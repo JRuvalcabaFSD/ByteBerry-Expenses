@@ -1,9 +1,10 @@
-import { CreateExpenseRequestDTO, ExpenseResponseDTO } from '@application';
+import { CreateExpenseRequestDTO, ExpenseResponseDTO, ListExpenseRequestDTO, PaginatedExpensesDTO } from '@application';
 
 //TODO documentar
 declare module '@ServiceMap' {
 	interface ServiceMap {
 		CreateExpenseUseCase: ICreateExpenseUseCase;
+		ListExpensesUseCase: IListExpensesUseCase;
 	}
 }
 
@@ -18,4 +19,8 @@ declare module '@ServiceMap' {
 
 export interface ICreateExpenseUseCase {
 	execute(request: CreateExpenseRequestDTO, requestId: string): Promise<ExpenseResponseDTO>;
+}
+
+export interface IListExpensesUseCase {
+	execute(request: ListExpenseRequestDTO, requestId: string): Promise<PaginatedExpensesDTO>;
 }

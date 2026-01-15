@@ -103,6 +103,7 @@ export class AppRouter {
 			{ name: 'deepHealth', value: `${baseUrl}/health/deep`, method: 'GET' },
 			{ name: 'health', value: `${baseUrl}/health`, method: 'GET' },
 			{ name: 'createExpense', value: `${baseUrl}/expense`, method: 'POST' },
+			{ name: 'listExpense', value: `${baseUrl}/expense`, method: 'GET' },
 		];
 
 		return routes.reduce(

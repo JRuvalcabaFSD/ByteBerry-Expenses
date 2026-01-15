@@ -1,6 +1,6 @@
 import { ExpenseEntity } from '@domain';
 import { ValidateRequestError } from '@shared';
-import { CreateExpenseData, CreateExpenseSchema, formattedZodError } from '@application';
+import { CreateExpenseData, CreateExpenseSchema, formattedZodError, ListExpensesData, ListExpensesSchema } from '@application';
 
 /**
  * Represents the response object for an expense.
@@ -22,6 +22,24 @@ export interface ExpenseResponseObject extends Omit<CreateExpenseData, 'amount' 
 	expenseDate: string;
 	createdAt: string;
 	updatedAt: string;
+}
+
+/**
+ * Represents a paginated response object for expenses.
+ * @interface PaginatedExpensesDTO
+ * @property {ExpenseResponseDTO[]} expenses - Array of expense data transfer objects.
+ * @property {number} total - Total number of expenses available.
+ * @property {number} skip - Number of records skipped in the pagination.
+ * @property {number} take - Number of records taken in the current page.
+ * @property {boolean} hasMore - Indicates whether there are more records available beyond the current page.
+ */
+
+export interface PaginatedExpensesDTO {
+	expenses: ExpenseResponseDTO[];
+	total: number;
+	skip: number;
+	take: number;
+	hasMore: boolean;
 }
 
 /**
@@ -113,5 +131,26 @@ export class ExpenseResponseDTO {
 			createdAt: this.expense.createdAt.toISOString(),
 			updatedAt: this.expense.updatedAt.toISOString(),
 		};
+	}
+}
+
+export class ListExpenseRequestDTO {
+	public readonly userId!: string;
+	public readonly skip?: number | undefined;
+	public readonly take?: number | undefined;
+
+	private constructor(data: ListExpensesData) {
+		Object.assign(this, data);
+	}
+
+	public static fromQuery(query: Record<string, string>, userId: string): ListExpenseRequestDTO {
+		const resp = ListExpensesSchema.safeParse({ ...query, userId });
+
+		if (!resp.success) {
+			const formatted = formattedZodError(resp.error, 'form');
+			throw new ValidateRequestError(formatted.msg, formatted.errors);
+		}
+
+		return new ListExpenseRequestDTO(resp.data);
 	}
 }
