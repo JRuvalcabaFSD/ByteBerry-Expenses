@@ -10,7 +10,7 @@ export class JwtTokenVO {
 	public static create(token: string): JwtTokenVO {
 		if (!token || typeof token !== 'string') throw new ValueObjectError('Token must be a non-empty string');
 		const parts = token.split('.');
-		if (parts.length !== 3) throw new ValueObjectError('Invalid JWT format: must have 3 parts');
+		if (parts.length !== 3 || parts.some((part) => part === '')) throw new ValueObjectError('Invalid JWT format: must have 3 parts');
 		return new JwtTokenVO(token);
 	}
 

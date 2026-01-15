@@ -5,10 +5,10 @@ import { CreateExpenseData, CreateExpenseSchema, formattedZodError, ListExpenses
 /**
  * Represents the response object for an expense.
  *
- * Extends the CreateExpenseData interface while omitting the original amount,
- * category, expenseDate, createdAt, and updatedAt properties.
- *
  * @interface ExpenseResponseObject
+ * @property {string} id - The unique identifier of the expense
+ * @property {string} userId - The unique identifier of the user who owns the expense
+ * @property {string} description - A brief description of the expense
  * @property {number} amountInDollars - The expense amount represented in dollars
  * @property {string | null} category - The category of the expense, or null if not assigned
  * @property {string} expenseDate - The date the expense occurred, formatted as a string
@@ -16,7 +16,10 @@ import { CreateExpenseData, CreateExpenseSchema, formattedZodError, ListExpenses
  * @property {string} updatedAt - The timestamp when the expense record was last updated
  */
 
-export interface ExpenseResponseObject extends Omit<CreateExpenseData, 'amount' | 'category' | 'expenseDate' | 'createdAt' | 'updatedAt'> {
+export interface ExpenseResponseObject {
+	id: string;
+	userId: string;
+	description: string;
 	amountInDollars: number;
 	category: string | null;
 	expenseDate: string;
@@ -134,6 +137,22 @@ export class ExpenseResponseDTO {
 	}
 }
 
+/**
+ * Data Transfer Object for listing expenses.
+ *
+ * This DTO encapsulates the parameters required to fetch a paginated list of expenses for a specific user.
+ *
+ * @remarks
+ * - The constructor is private; instances should be created using the static `fromQuery` method.
+ * - Validates input using `ListExpensesSchema` and throws a `ValidateRequestError` on failure.
+ *
+ * @property {string} userId - The unique identifier of the user whose expenses are being listed.
+ * @property {number | undefined} skip - The number of records to skip for pagination (optional).
+ * @property {number | undefined} take - The number of records to take for pagination (optional).
+ *
+ * @method fromQuery - Creates an instance from a query object and user ID, performing validation.
+ */
+
 export class ListExpenseRequestDTO {
 	public readonly userId!: string;
 	public readonly skip?: number | undefined;
@@ -142,6 +161,18 @@ export class ListExpenseRequestDTO {
 	private constructor(data: ListExpensesData) {
 		Object.assign(this, data);
 	}
+
+	/**
+	 * Creates a {@link ListExpenseRequestDTO} instance from a query object and user ID.
+	 *
+	 * Parses and validates the combined query and userId using {@link ListExpensesSchema}.
+	 * If validation fails, throws a {@link ValidateRequestError} with formatted error details.
+	 *
+	 * @param query - The query parameters as a record of string keys and values.
+	 * @param userId - The ID of the user to associate with the request.
+	 * @returns A validated {@link ListExpenseRequestDTO} instance.
+	 * @throws {ValidateRequestError} If the query parameters fail validation.
+	 */
 
 	public static fromQuery(query: Record<string, string>, userId: string): ListExpenseRequestDTO {
 		const resp = ListExpensesSchema.safeParse({ ...query, userId });
