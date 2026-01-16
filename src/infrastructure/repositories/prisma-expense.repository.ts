@@ -138,6 +138,7 @@ export class ExpensesRepository implements IExpensesRepository {
 	 * @throws {Error} This method is not yet implemented
 	 */
 
+	// TODO mover la validación del ownership al use case
 	@LogContextMethod()
 	public async update(id: string, userId: string, updates: UpdateExpense): Promise<ExpenseEntity> {
 		this.logger.debug('Updating expense with ownership verification', { expenseId: id, userId });
@@ -176,6 +177,7 @@ export class ExpensesRepository implements IExpensesRepository {
 	 * @throws {Error} If the expense with the given id is not found or if the deletion operation fails
 	 */
 
+	// TODO mover la validación del ownership al use case
 	@LogContextMethod()
 	public async delete(id: string, userId: string): Promise<void> {
 		this.logger.debug('Deleting expense with ownership verification', { expenseId: id, userId });
