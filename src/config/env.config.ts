@@ -16,6 +16,19 @@ export class Config implements IConfig {
 	public readonly logLevel: LogLevel;
 	public readonly logRequests: boolean;
 
+	//OAuth2
+	public readonly jwtIssuer: string;
+	public readonly jwtAudience: string;
+	public readonly jwksCacheTtl: number;
+	public readonly jwksCacheMaxAge: number;
+	public readonly oauth2ServiceUrl: string;
+	public readonly oauth2JwksUrl: string;
+
+	// Database
+	public readonly databaseUrl: string;
+	public readonly databasePoolMin: number;
+	public readonly databasePoolMax: number;
+
 	//Security environments
 	readonly corsOrigins: string[];
 
@@ -34,6 +47,25 @@ export class Config implements IConfig {
 
 			this.logLevel = logLevel;
 			this.logRequests = logRequest;
+
+			// ========================================
+			// OAuth2 environments
+			// ========================================
+			this.jwtIssuer = this.normalizeUrls(env.get('JWT_ISSUER').default('https://byteberry.jrmdev.org').asUrlString());
+			this.jwtAudience = env.get('JWT_AUDIENCE').default('byteberry-api').asString();
+			this.jwksCacheTtl = env.get('JWKS_CACHE_TTL').default('3600').asIntPositive();
+			this.jwksCacheMaxAge = env.get('JWKS_CACHE_MAX_AGE').default('86400').asIntPositive();
+			this.oauth2ServiceUrl = this.normalizeUrls(env.get('OAUTH2_SERVICE_URL').default('http://localhost:4000').asUrlString());
+			this.oauth2JwksUrl = this.normalizeUrls(
+				env.get('OAUTH2_JWKS_URL').default('https://localhost:4000/auth/.well-known/jwks.json').asUrlString()
+			);
+
+			// ========================================
+			// Database environments
+			// ========================================
+			this.databaseUrl = this.normalizeUrls(env.get('DATABASE_URL').required().asUrlString());
+			this.databasePoolMax = env.get('DATABASE_POOL_MAX').default('10').asIntPositive();
+			this.databasePoolMin = env.get('DATABASE_POOL_MIN').default('2').asIntPositive();
 
 			// ========================================
 			// Security environments

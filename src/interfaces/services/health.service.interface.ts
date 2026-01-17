@@ -13,6 +13,7 @@ declare module '@ServiceMap' {
 	interface ServiceMap {
 		HealthService: IHealthService;
 		HealthRegistry: IHealthRegistry;
+		DatabaseHealthChecker: IDatabaseHealthChecker;
 	}
 }
 
@@ -36,7 +37,7 @@ declare module '@ServiceMap' {
 
 export interface IDatabaseHealthChecker {
 	checkConnection(): Promise<boolean>;
-	checkTables(): Promise<{ users: boolean; oAuthClients: boolean; authCodes: boolean; refreshTokens: boolean }>;
+	checkTables(): Promise<{ expenses: boolean }>;
 	getHealthStatus(): Promise<DatabaseHealthResponse>;
 }
 

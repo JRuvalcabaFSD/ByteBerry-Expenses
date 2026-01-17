@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider   = "prisma-client"
+  output     = "../generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Expenses {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  amount      Int
+  description String   @db.VarChar(500)
+  category    String   @db.VarChar(100)
+  expenseDate DateTime @default(now()) @map("expense_date")
+  createdAt   DateTime @default(now()) @map("create.at")
+  updatedAt   DateTime @updatedAt @map("update_at")
+
+  @@index([userId], map: "idx_expenses_user_id")
+  @@index([expenseDate], map: "idx_expenses_expense_date")
+  @@index([userId, expenseDate], map: "idx_expenses_user_date")
+  @@map("expenses")
+}

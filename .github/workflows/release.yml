@@ -47,20 +47,19 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # TODO F2
-      # - name: Generate Prisma Client
-      #   env:
-      #     DATABASE_URL: ignore
-      #   run: pnpm prisma generate
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: ignore
+        run: pnpm prisma generate
 
-      # - name: Set up Docker Compose
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y docker-compose
+      - name: 🐳 Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
       - name: 📝 Run full validation
         env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5433/expenses_test?schema=public
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5434/byteberry_expenses_test?schema=public"
         run: |
           export NODE_ENV=test
           export CI=true
@@ -69,7 +68,7 @@ jobs:
           pnpm audit
           pnpm build
           # Modificar si se agregan tests que requieran DB
-          pnpm test:unit
+          pnpm test:ci
 
       - name: 📦 Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -33,17 +33,17 @@ export async function bootstrap({ skipDbValidation = false } = {}): Promise<boot
 		const container = bootstrapContainer();
 		const gracefulShutdown = container.resolve('GracefulShutdown');
 		const httpServer = container.resolve('HttpServer');
+		const DBConfig = container.resolve('DBConfig');
 
 		logger = withLoggerContext(container.resolve('Logger'), 'bootstrap');
 
 		logger.info('Service starting');
 
-		const shutdown = configureShutdown(gracefulShutdown, logger, httpServer);
+		const shutdown = configureShutdown(gracefulShutdown, logger, httpServer, DBConfig);
 
-		// TODO F2
-		// if (!skipDbValidation) {
-		// 	await validateDbConnection(container, logger);
-		// }
+		if (!skipDbValidation) {
+			await validateDbConnection(container, logger);
+		}
 
 		await httpServer.start();
 
@@ -63,14 +63,13 @@ export async function bootstrap({ skipDbValidation = false } = {}): Promise<boot
  * @throws {BootstrapError} If the database connection test fails.
  */
 
-// TODO F2
-// async function validateDbConnection(container: IContainer, logger: ILogger): Promise<void> {
-// 	const ctxLogger = withLoggerContext(logger, 'bootstrap.validateDbConnection');
+async function validateDbConnection(container: IContainer, logger: ILogger): Promise<void> {
+	const ctxLogger = withLoggerContext(logger, 'bootstrap.validateDbConnection');
 
-// 	try {
-// 		await container.resolve('DBConfig').testConnection();
-// 	} catch (error) {
-// 		ctxLogger.error('Database connection failed', { error: getErrMessage(error) });
-// 		throw new BootstrapError('Database connection failed', { error: getErrMessage(error) });
-// 	}
-// }
+	try {
+		await container.resolve('DBConfig').testConnection();
+	} catch (error) {
+		ctxLogger.error('Database connection failed', { error: getErrMessage(error) });
+		throw new BootstrapError('Database connection failed', { error: getErrMessage(error) });
+	}
+}

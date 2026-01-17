@@ -6,7 +6,7 @@ import { AppError } from '@domain';
 describe('Bootstrap Container', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		process.env.DATABASE_URL = "dummy"
+		process.env.DATABASE_URL = "http://localhost"
 	});
 
 	afterEach(() => {

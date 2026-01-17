@@ -1,16 +1,5 @@
-// ======================================
-// import modules for implements decorators
-// ======================================
-import './services/clock.service.js';
-import './services/health.service.js';
-import './services/uuid.service.js';
-import './services/winston-logger.service.js';
-import './http/http.server.js';
-import './lifecycle/shutdown.js';
-
-// ======================================
-// Export modules
-// ======================================
+// Clients
+export * from './clients/jwks.client.js';
 
 //Http
 export * from './http/http.server.js';
@@ -26,9 +15,14 @@ export * from './http/middlewares/security.middleware.js';
 export * from './lifecycle/shutdown.js';
 export * from './lifecycle/shutdown-config.js';
 
+//Repositories
+export * from './repositories/prisma-expense.repository.js';
+
 //Services
 export * from './services/clock.service.js';
 export * from './services/health-register.service.js';
 export * from './services/health.service.js';
 export * from './services/uuid.service.js';
 export * from './services/winston-logger.service.js';
+export * from './services/jwt-verifier.service.js';
+export * from './services/database-health-checker.service.js';

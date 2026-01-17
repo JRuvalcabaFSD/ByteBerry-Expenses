@@ -91,16 +91,10 @@ export interface DatabaseHealthResponse {
 	connected: boolean;
 	latency: number;
 	tables: {
-		users: boolean;
-		oAuthClients: boolean;
-		authCodes: boolean;
-		refreshTokens: boolean;
+		expenses: boolean;
 	};
 	recordCounts?: {
-		users: number;
-		oAuthClients: number;
-		authCodes: number;
-		refreshTokens: number;
+		expenses: number;
 	};
 	error?: string;
 }

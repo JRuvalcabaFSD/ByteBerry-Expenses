@@ -1,4 +1,4 @@
-import { ILogger } from '@interfaces';
+import { IJwtPayload, ILogger } from '@interfaces';
 
 declare global {
 	namespace Express {
@@ -6,10 +6,7 @@ declare global {
 			requestId?: string;
 			logger?: ILogger;
 			startTime?: number;
-			user?: {
-				userId: string;
-				sessionId: string;
-			};
+			user?: IJwtPayload;
 		}
 	}
 }

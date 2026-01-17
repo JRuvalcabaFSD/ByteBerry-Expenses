@@ -1,0 +1,53 @@
+services:
+  # Base de datos para el servicio Expenses
+  expenses-db:
+    image: postgres:15-alpine
+    networks:
+      - byteberry-network
+    container_name: expenses-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: expenses_user
+      POSTGRES_PASSWORD: expenses_pass
+      POSTGRES_DB: byteberry_expenses_dev
+    volumes:
+      - expenses_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U expenses_user -d byteberry_expenses_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  byteberry-expenses:
+    image: jruvalcabafsd/byteberry-expenses:${TAG:-latest}
+    container_name: byteberry-expenses
+    env_file:
+      - .env
+    environment:
+      - OAUTH2_SERVICE_URL=http://byteberry-oauth2:4000
+      - OAUTH2_JWKS_URL=http://byteberry-oauth2:4000/auth/.well-known/jwks.json
+      - DATABASE_URL=postgresql://expenses_user:expenses_pass@expenses-db:5432/byteberry_expenses_dev?schema=public
+    networks:
+      - byteberry-network
+    ports:
+      - "4001:4001" # ← SOLO PARA DESARROLLO LOCAL
+    depends_on:
+      expenses-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  expenses_db_data:
+
+networks:
+  byteberry-network:
+    external: true
+    name: byteberry-network
+    driver: bridge

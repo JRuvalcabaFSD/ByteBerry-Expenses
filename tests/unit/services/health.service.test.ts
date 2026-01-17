@@ -37,6 +37,7 @@ describe('HealthService', () => {
 	let mockClock: Interfaces.IClock;
 	let mockLogger: Interfaces.ILogger;
 	let mockHealthRegistry: Interfaces.IHealthRegistry;
+	let mockDbHealthChecker: any;
 
 	beforeEach(() => {
 		mockConfig = {
@@ -62,7 +63,10 @@ describe('HealthService', () => {
 			] as [keyof ServiceMap, HealthCheckable][])),
 		} as unknown as Interfaces.IHealthRegistry;
 
-		healthService = new HealthService(mockConfig, mockUuid, mockClock, mockLogger, mockHealthRegistry);
+		mockDbHealthChecker = { checkHealth: vi.fn() };
+		healthService = new HealthService(mockConfig, mockUuid, mockClock, mockLogger, mockHealthRegistry, mockDbHealthChecker);
+		// Por defecto, la base de datos está conectada
+		(healthService as any).checkDatabaseHealth = vi.fn().mockResolvedValue({ connected: true });
 	});
 
 	describe('getHealth', () => {
@@ -95,6 +99,7 @@ describe('HealthService', () => {
 			mockHealthRegistry.getCheckers = vi.fn(() => new Map([
 				['Config', { checkHealth: vi.fn(() => Promise.resolve({ status: 'unhealthy', message: 'Fail' })) }],
 			] as [keyof ServiceMap, HealthCheckable][]));
+			(healthService as any).checkDatabaseHealth = vi.fn().mockResolvedValue({ connected: false });
 
 			const mockReq = {} as Request;
 			const mockRes = {
@@ -151,6 +156,7 @@ describe('HealthService', () => {
 			mockHealthRegistry.getCheckers = vi.fn(() => new Map([
 				['Config', { checkHealth: vi.fn(() => Promise.resolve({ status: 'unhealthy', message: 'Fail' })) }],
 			] as [keyof ServiceMap, HealthCheckable][]));
+			(healthService as any).checkDatabaseHealth = vi.fn().mockResolvedValue({ connected: false });
 
 			const mockReq = {} as Request;
 			const mockRes = {
@@ -166,6 +172,7 @@ describe('HealthService', () => {
 
 	describe('checkHealth', () => {
 		it('should return simple health response', async () => {
+			(healthService as any).checkDatabaseHealth = vi.fn().mockResolvedValue({ connected: true });
 			const result = await healthService.checkHealth('simple', 'req-123', criticalServices);
 			expect(result).toEqual(expect.objectContaining({
 				status: 'healthy',
@@ -179,6 +186,7 @@ describe('HealthService', () => {
 		});
 
 		it('should return deep health response', async () => {
+			(healthService as any).checkDatabaseHealth = vi.fn().mockResolvedValue({ connected: true });
 			const result = await healthService.checkHealth('deep', 'req-123', criticalServices);
 
 			expect(result).toHaveProperty('dependencies');
@@ -218,8 +226,8 @@ describe('HealthService', () => {
 			const dependencies = {
 				service1: { status: 'unhealthy' } as Interfaces.DependencyResponse,
 			};
-
-			const result = (healthService as any).determineOverallStatus(dependencies);
+			const databaseHealth = { connected: true };
+			const result = (healthService as any).determineOverallStatus(dependencies, databaseHealth);
 
 			expect(result).toBe('unhealthy');
 		});
@@ -228,8 +236,8 @@ describe('HealthService', () => {
 			const dependencies = {
 				service1: { status: 'healthy' } as Interfaces.DependencyResponse,
 			};
-
-			const result = (healthService as any).determineOverallStatus(dependencies);
+			const databaseHealth = { connected: true };
+			const result = (healthService as any).determineOverallStatus(dependencies, databaseHealth);
 
 			expect(result).toBe('healthy');
 		});
@@ -238,8 +246,8 @@ describe('HealthService', () => {
 			const dependencies = {
 				service1: { status: 'degraded' } as unknown as Interfaces.DependencyResponse,
 			};
-
-			const result = (healthService as any).determineOverallStatus(dependencies);
+			const databaseHealth = { connected: true };
+			const result = (healthService as any).determineOverallStatus(dependencies, databaseHealth);
 
 			expect(result).toBe('degraded');
 		});
@@ -266,7 +274,7 @@ describe('HealthService', () => {
 
 		it('should handle fallback on config error', async () => {
 			const brokenConfig = { ...mockConfig, serviceName: undefined } as unknown as typeof mockConfig;
-			healthService = new HealthService(brokenConfig, mockUuid, mockClock, mockLogger, mockHealthRegistry);
+			healthService = new HealthService(brokenConfig, mockUuid, mockClock, mockLogger, mockHealthRegistry, mockDbHealthChecker);
 
 			const mockReq = {} as Request;
 			const mockRes = {
