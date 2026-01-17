@@ -182,7 +182,7 @@ jobs:
         run: |
           export NODE_ENV=test
           export CI=true
-          pnpm test:unit
+          pnpm test:ci
 
   security:
     name: 🔒 Security Audit
