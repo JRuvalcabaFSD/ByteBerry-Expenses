@@ -1,0 +1,36 @@
+# docker-compose-test.yml
+# Uso: pnpm test:db:up / pnpm test:db:down
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: byteberry-expenses-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: byteberry_expenses_test
+    ports:
+      - "5434:5432"  # Puerto diferente a dev (5432) y OAuth2 test (5433)
+
+    # tmpfs hace que la DB corra en RAM = MÁS RÁPIDO
+    # Los datos se pierden al detener el contenedor (perfecto para tests)
+    tmpfs:
+      - /var/lib/postgresql/data
+
+    # Health check para asegurar que la DB está lista
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d byteberry_expenses_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    # Logging mínimo para no saturar output de tests
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: byteberry-expenses-test-network
