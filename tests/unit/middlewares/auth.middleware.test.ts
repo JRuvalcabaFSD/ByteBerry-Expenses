@@ -18,6 +18,7 @@ describe('createAuthMiddleware', () => {
 	let mockNext: NextFunction;
 
 	beforeEach(() => {
+		process.env.NODE_ENV = 'production';
 		mockJwtVerifier = {
 			verify: vi.fn(),
 		};

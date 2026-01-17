@@ -1,33 +1,46 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
 import { JwtTokenVO } from '@domain';
-import { IJwtVerifier } from '@interfaces';
+import { IJwtPayload, IJwtVerifier } from '@interfaces';
 import { InvalidCredentialsError } from '@shared';
 
 /**
- * Creates an authentication middleware that verifies JWT tokens from the Authorization header.
+ * Creates an Express middleware for authenticating requests using JWT.
  *
- * @param jwtVerifier - The JWT verifier instance used to validate and decode tokens
- * @returns An Express middleware function that validates the Authorization header and attaches the decoded JWT payload to the request object
+ * - In `test` mode, expects an `X-Test-User-Id` header and injects a mock JWT payload into `req.user`.
+ * - In other environments, expects a valid `Authorization: Bearer <token>` header, verifies the JWT,
+ *   and attaches the decoded payload to `req.user`.
  *
- * @throws {InvalidCredentialsError} If the Authorization header is missing
- * @throws {InvalidCredentialsError} If the Authorization header format is invalid (expected: "Bearer <token>")
+ * @param jwtVerifier - An instance implementing `IJwtVerifier` to verify JWT tokens.
+ * @returns An Express `RequestHandler` middleware function.
  *
- * @example
- * ```typescript
- * const authMiddleware = createAuthMiddleware(jwtVerifier);
- * app.use(authMiddleware);
- * ```
- *
- * @remarks
- * The middleware expects the Authorization header to follow the format: "Bearer <token>".
- * Upon successful verification, the decoded JWT payload is attached to `req.user`.
- * Any errors are passed to the next middleware for centralized error handling.
+ * @throws {InvalidCredentialsError} If required headers are missing or invalid.
  */
 
 export function createAuthMiddleware(jwtVerifier: IJwtVerifier): RequestHandler {
 	return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		try {
+			if (process.env.NODE_ENV === 'test') {
+				const testUserId = req.headers['x-test-user-id'] as string;
+
+				if (!testUserId) {
+					throw new InvalidCredentialsError('X-Test-User-Id header is required in test mode');
+				}
+
+				// Mock JWT payload for tests
+				const mockPayload: IJwtPayload = {
+					sub: testUserId,
+					iat: Math.floor(Date.now() / 1000),
+					exp: Math.floor(Date.now() / 1000) + 3600,
+					iss: 'byteberry-test',
+					client_id: 'test-client',
+					scope: 'read write',
+				};
+
+				req.user = mockPayload;
+				return next();
+			}
+
 			const authHeader = req.headers.authorization;
 
 			if (!authHeader) throw new InvalidCredentialsError('Authorization header is required');
