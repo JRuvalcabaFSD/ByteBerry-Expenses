@@ -21,7 +21,7 @@ concurrency:
 
 env:
   NODE_VERSION: "22.21.1"
-  DATABASE_URL: "postgresql://test_user:test_password@localhost:5433/expenses_test?schema=public"
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5434/byteberry_expenses_test?schema=public"
 
 jobs:
   setup:
