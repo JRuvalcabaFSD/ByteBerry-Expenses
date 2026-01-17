@@ -47,16 +47,15 @@ jobs:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      # TODO F2
-      # - name: Generate Prisma Client
-      #   env:
-      #     DATABASE_URL: ignore
-      #   run: pnpm prisma generate
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: ignore
+        run: pnpm prisma generate
 
-      # - name: Set up Docker Compose
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y docker-compose
+      - name: 🐳 Set up Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
       - name: 📝 Run full validation
         env:
