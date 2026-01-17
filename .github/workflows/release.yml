@@ -59,7 +59,7 @@ jobs:
 
       - name: 📝 Run full validation
         env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5433/expenses_test?schema=public
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5434/byteberry_expenses_test?schema=public"
         run: |
           export NODE_ENV=test
           export CI=true
